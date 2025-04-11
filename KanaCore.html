@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KanaCore</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #eef2f7;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      border-radius: 10px;
+      padding: 30px;
+      max-width: 650px;
+      width: 100%;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 20px;
+      color: #34495e;
+    }
+    select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    .quiz-section {
+      display: none;
+      margin-top: 30px;
+    }
+    .question-box {
+      margin-bottom: 20px;
+      font-size: 18px;
+      color: #2d3436;
+    }
+    #options button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      background-color: #3498db;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #options button:hover {
+      background-color: #2980b9;
+    }
+    .progress, .timer {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <p><strong>Check Me out</strong></p>
+    <a href="https://sathvik-harish.github.io/Block-Run/">Checkout My game - Block Run</a>
+    <p><strong>or</strong></p>
+    <a href="github.com/sathvik-harish/">Support me on Github</a>
+    <p><strong>or</strong></p>
+    <a href="https://www.sites.google.com/view/kanacore-ss/home/">Click Here to know more about KanaCore</a>
+    <h1>KanaCore Quiz</h1>
+    <p>Test your Japanese language skills with our jlptLevel quizzes!</p>
+    <p>Select the quiz type, answer format, and JLPT level to get started.</p>
+    <div class="selector-section">
+      <label for="quizType">Choose Quiz Type:</label>
+      <select id="quizType">
+        <option>Vocabulary</option>
+        <option>Grammar</option>
+        <option>Hiragana</option>
+        <option>Katakana</option>
+        <option>Kanji</option>
+      </select>
+
+      <label for="answerFormat">Choose Answer Format:</label>
+      <select id="answerFormat">
+        <option>Multiple Choice</option>
+      </select>
+      <p>Note: Currently, only Multiple Choice format is available.</p>
+      <p>Note: The quiz will be based on the selected JLPT level.</p>
+      <label for="jlptLevel">Choose JLPT Level:</label>
+      <select id="jlptLevel">
+        <option>N5</option>
+        <option>N4</option>
+      </select>
+      <p>Note: Currently, only N5 and N4 levels are available.</p>
+      <label for="quizLength">Choose Quiz Length:</label>
+      <select id="quizLength">
+        <option>20 Questions</option>
+      </select>
+      <p>Note: Currently, only 20 questions are available.</p>
+
+      <button onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <div class="quiz-section" id="quizSection">
+      <div class="timer" id="timer">Time Left: 10:00</div>
+      <div class="progress" id="progress">Question 1 of 20</div>
+      <div class="question-box" id="questionBox">Question text here</div>
+      <div id="options"></div>
+    </div>
+  </div>
+
+  <script>
+    let questionIndex = 0;
+    let score = 0;
+    let timeLeft = 600; // 10 minutes;
+    let interval;
+    let questions = [];
+
+    const questionBank = {
+      Vocabulary: {
+        N5: [
+        { "question": "ともだちと ______ をたべました。", "options": ["ごはん", "おおきい", "あおい", "はなす"], "correct": "ごはん" },
+  { "question": "きょう は ______ が いいです。", "options": ["てんき", "べんきょう", "せんせい", "みず"], "correct": "てんき" },
+  { "question": "あの ______ は しんぶんを よんでいます。", "options": ["ひと", "すわる", "あたらしい", "いえ"], "correct": "ひと" },
+  { "question": "にほんご を ______。", "options": ["べんきょうします", "いきます", "たべます", "のみます"], "correct": "べんきょうします" },
+  { "question": "まいにち ______ をのみます。", "options": ["みず", "あおい", "くつ", "いえ"], "correct": "みず" },
+  { "question": "わたしのへや は ______ です。", "options": ["きれい", "のみます", "えんぴつ", "いぬ"], "correct": "きれい" },
+  { "question": "いま、がっこう に ______。", "options": ["いきます", "のみます", "よみます", "あります"], "correct": "いきます" },
+  { "question": "あした は ______ に いきます。", "options": ["ともだち", "かばん", "かわ", "がっこう"], "correct": "がっこう" },
+  { "question": "この ______ は やすいです。", "options": ["シャツ", "べんきょう", "しろい", "みぎ"], "correct": "シャツ" },
+  { "question": "きのう、えいが を ______。", "options": ["みました", "はなしました", "ききました", "たちました"], "correct": "みました" },
+  { "question": "おかあさん に プレゼント を ______。", "options": ["あげました", "よみました", "ききました", "いきました"], "correct": "あげました" },
+  { "question": "にほん は とても ______。", "options": ["きれい", "のみます", "ききます", "いぬ"], "correct": "きれい" },
+  { "question": "せんせい の ことば を ______。", "options": ["ききます", "のみます", "いきます", "かきます"], "correct": "ききます" },
+  { "question": "かさ を ______。", "options": ["もちます", "のみます", "みます", "かきます"], "correct": "もちます" },
+  { "question": "えき で ともだち に ______。", "options": ["あいました", "のみました", "ききました", "かきました"], "correct": "あいました" },
+  { "question": "この ______ は ちいさいです。", "options": ["くつ", "べんきょう", "しずか", "いす"], "correct": "くつ" },
+  { "question": "くるま を ______。", "options": ["うんてんします", "たべます", "のります", "かいます"], "correct": "うんてんします" },
+  { "question": "へや の なか に つくえ が ______。", "options": ["あります", "います", "かきます", "みます"], "correct": "あります" },
+  { "question": "いぬ は にわ に ______。", "options": ["います", "あります", "いきます", "のみます"], "correct": "います" },
+  { "question": "まいにち にほんご を ______。", "options": ["れんしゅうします", "のみます", "ききます", "かいます"], "correct": "れんしゅうします" }
+
+        ],
+        N4: [
+        { "question": "いもうと は ______ に すんでいます。", "options": ["東京", "東京を", "東京が", "東京へ"], "correct": "東京" },
+  { "question": "先生 は クラス で ______。", "options": ["話します", "話す", "話して", "話しました"], "correct": "話します" },
+  { "question": "あの 人 は 有名 な ______ です。", "options": ["歌手", "歌を", "歌に", "歌が"], "correct": "歌手" },
+  { "question": "父 は 毎朝 コーヒー を ______。", "options": ["飲みます", "飲みる", "飲んで", "飲んだ"], "correct": "飲みます" },
+  { "question": "きのう 公園 で 犬 と ______。", "options": ["遊びました", "遊びます", "遊ぶ", "遊んだ"], "correct": "遊びました" },
+  { "question": "この 本 は とても ______。", "options": ["有名", "有名な", "有名に", "有名だ"], "correct": "有名" },
+  { "question": "毎晩 九時 に ______。", "options": ["寝ます", "寝る", "寝た", "寝て"], "correct": "寝ます" },
+  { "question": "電車 で 学校 に ______。", "options": ["行きます", "行く", "行った", "行って"], "correct": "行きます" },
+  { "question": "今週 の 土曜日 に ______ が あります。", "options": ["テスト", "テストを", "テストに", "テストが"], "correct": "テスト" },
+  { "question": "山田さん の ______ は どこ ですか。", "options": ["家", "家が", "家を", "家に"], "correct": "家" },
+  { "question": "私は 日本語 の 勉強 が ______。", "options": ["好きです", "好きだ", "好きな", "好きに"], "correct": "好きです" },
+  { "question": "夏休み に 海 へ ______。", "options": ["行きました", "行きます", "行く", "行って"], "correct": "行きました" },
+  { "question": "この 映画 は とても ______。", "options": ["面白い", "面白く", "面白さ", "面白いです"], "correct": "面白い" },
+  { "question": "パン を 三つ ______。", "options": ["買いました", "買います", "買って", "買う"], "correct": "買いました" },
+  { "question": "兄 は サッカー が ______。", "options": ["上手です", "上手な", "上手に", "上手だ"], "correct": "上手です" },
+  { "question": "日本 の 料理 を ______。", "options": ["食べたい", "食べる", "食べた", "食べます"], "correct": "食べたい" },
+  { "question": "今日は ______ を しました。", "options": ["勉強", "勉強が", "勉強に", "勉強で"], "correct": "勉強" },
+  { "question": "新しい くつ を ______。", "options": ["履きます", "履く", "履いた", "履いて"], "correct": "履きます" },
+  { "question": "あの 人 は とても ______。", "options": ["親切", "親切な", "親切に", "親切だ"], "correct": "親切" },
+  { "question": "日曜日 に 友だち と ______ に 行きます。", "options": ["買い物", "買い物を", "買い物が", "買い物で"], "correct": "買い物" }
+        ]
+      },
+      Grammar: {
+        N5: [
+          { question: "いぬ が にわ に ______。", options: ["います", "あります", "なります", "とります"], correct: "います" },
+          { question: "きのう ______。", options: ["にほんへ いきました", "いきます にほん", "にほんを いきました", "にほんは いきました"], correct: "にほんへ いきました" }
+        ],
+        N4: [
+          { question: "日本語を ______ ことが ありますか。", options: ["話した", "話す", "話して", "話し"], correct: "話した" }
+        ]
+      },
+      Hiragana: {
+        N5: [
+          { question: "Which is the correct Hiragana for 'a'?", options: ["あ", "い", "う", "え"], correct: "あ" }
+        ],
+        N4: [
+          { question: "Which is the correct Hiragana for 'nu'?", options: ["ぬ", "ね", "な", "の"], correct: "ぬ" }
+        ]
+      },
+      Katakana: {
+        N5: [
+          { question: "Which is the Katakana for 'su'?", options: ["ス", "セ", "シ", "サ"], correct: "ス" }
+        ],
+        N4: [
+          { question: "Which is the Katakana for 'ke'?", options: ["ケ", "カ", "コ", "ク"], correct: "ケ" }
+        ]
+      },
+      Kanji: {
+        N5: [
+          { question: "What is the reading of 学生?", options: ["がくせい", "がくこう", "せいがく", "こうせい"], correct: "がくせい" }
+        ],
+        N4: [
+          { question: "What is the reading of 地下鉄?", options: ["ちかてつ", "ちしたつ", "じてつか", "てつかち"], correct: "ちかてつ" }
+        ]
+      }
+    };
+
+    function startQuiz() {
+      const type = document.getElementById('quizType').value;
+      const level = document.getElementById('jlptLevel').value;
+      questions = (questionBank[type] && questionBank[type][level]) || [];
+      if (questions.length === 0) {
+        alert("No questions available for this type and level yet.");
+        return;
+      }
+      questionIndex = 0;
+      score = 0;
+      timeLeft = 600;
+
+      document.querySelector('.selector-section').style.display = 'none';
+      document.getElementById('quizSection').style.display = 'block';
+      renderQuestion();
+      interval = setInterval(updateTimer, 1000);
+    }
+
+    function renderQuestion() {
+      const q = questions[questionIndex];
+      document.getElementById('questionBox').innerText = q.question;
+      document.getElementById('progress').innerText = `Question ${questionIndex + 1} of ${questions.length}`;
+
+      const optionsDiv = document.getElementById('options');
+      optionsDiv.innerHTML = '';
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.innerText = opt;
+        btn.onclick = () => handleAnswer(opt);
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(selected) {
+      if (selected === questions[questionIndex].correct) score++;
+      questionIndex++;
+      if (questionIndex < questions.length) {
+        renderQuestion();
+      } else {
+        endQuiz();
+      }
+    }
+
+    function updateTimer() {
+      timeLeft--;
+      const min = Math.floor(timeLeft / 60);
+      const sec = timeLeft % 60;
+      document.getElementById('timer').innerText = `Time Left: ${min}:${sec < 10 ? '0' : ''}${sec}`;
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        endQuiz();
+      }
+    }
+
+    function endQuiz() {
+      clearInterval(interval);
+      document.getElementById('quizSection').innerHTML = `<h2>Quiz Completed!</h2><p>Your Score: ${score} / ${questions.length}</p>`;
+    }
+  </script>
+</body>
+</html>
